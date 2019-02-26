@@ -1,13 +1,15 @@
-# Standard library imports...
 from unittest.mock import patch
-import json
 
-# Third-party imports...
-from nose.tools import assert_is_not_none, assert_equal, assert_list_equal
+from nose.tools import assert_is_not_none, assert_equal, assert_list_equal, assert_true
 
-# Local imports...
-from mrnotifier.gitlab import get_merge_requests, MergeRequest, Award
-from mrnotifier.config import TrayConfig
+from mrnotifier.gitlab import get_merge_requests, MergeRequest
+from tests.utils import get_example_merge_requests
+
+
+@patch('tests.test_mergerequests.get_merge_requests')
+def test_mocking(mock_get_merge_requests):
+    get_merge_requests()
+    assert_true(mock_get_merge_requests.called)
 
 
 @patch('mrnotifier.gitlab.requests.Session.get')
@@ -20,19 +22,11 @@ def test_get_merge_requests_is_ok(mock_get):
     assert_is_not_none(response)
     assert_equal(response, [MergeRequest(example_request)])
 
+    assert_true(mock_get.called)
+
 
 @patch('mrnotifier.gitlab.requests.Session.get')
 def test_get_opened_merge_requests_is_not_ok(mock_get):
     mock_get.return_value.ok = False
     response = get_merge_requests()
     assert_list_equal(response, [])
-
-
-def get_example_merge_requests():
-    with open('tests/resources/merge_requests.json') as f:
-        return json.load(f)[0]
-
-
-def get_example_award_emoji():
-    with open('tests/resources/award_emoji.json') as f:
-        return json.load(f)[0]
