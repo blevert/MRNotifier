@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "389ad054650cf670cb50de516e152af16d1ebb9811c2a45cdf69abc28e7479d8"
+            "sha256": "6c25ce846a36c288030328e977d9e486d5a143f2868e2bd23cfd6f982567e5e0"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.6"
+            "python_version": "3.7.2"
         },
         "sources": [
             {
@@ -39,7 +39,7 @@
         },
         "infi-systray": {
             "hashes": [
-                "sha256:baea99548d882d4a7a6d3db4942f9bf93b88e30ddb9abe96d0dded44f564cf50"
+                "sha256:eb2306e166796ddd9683fd0669302e0ff044bb69fe387ba7daa53c4195f78880"
             ],
             "index": "pypi",
             "version": "==0.1.11"
