@@ -7,7 +7,9 @@ from mrnotifier.config import ObserveConfig
 _observerable = Observable \
     .interval(ObserveConfig.interval) \
     .map(lambda dummy: get_merge_requests()) \
-    .retry()
+    .retry() \
+    .publish() \
+    .ref_count()
 
 _ready_to_merge = _observerable \
     .map(lambda all_requests: any([_is_ready_to_merge(mr) for mr in all_requests])) \
