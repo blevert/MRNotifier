@@ -1,6 +1,6 @@
 import logging
 
-from mrnotifier.observer import on_ready_to_merge
+from mrnotifier.observe import on_ready_to_merge
 from mrnotifier.tray import Tray
 
 logging.basicConfig(level=logging.INFO)
