@@ -1,0 +1,3 @@
+# GitLab's Merge Requests notifier
+
+Python & RX learning...
