@@ -11,9 +11,10 @@ class GitlabConfig:
 
 
 class TrayConfig:
-    main = _config.get('tray', 'main')
-    merge = _config.get('tray', 'merge')
+    main_icon = _config.get('tray', 'main_icon')
+    merge_icon = _config.get('tray', 'merge_icon')
     hover_text = _config.get('tray', 'hover_text')
+    menu_text = _config.get('tray', 'menu_text')
 
 
 class ObserveConfig:
