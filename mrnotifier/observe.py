@@ -4,23 +4,24 @@ from mrnotifier.gitlab import get_merge_requests
 from mrnotifier.config import ObserveConfig
 
 
-_observerable = Observable \
-    .interval(ObserveConfig.interval) \
-    .map(lambda dummy: get_merge_requests()) \
-    .retry() \
-    .publish() \
-    .ref_count()
+class Observe:
+    def __init__(self, scheduler=None):
+        self._observerable = Observable \
+            .interval(ObserveConfig.interval, scheduler) \
+            .map(lambda dummy: get_merge_requests()) \
+            .retry() \
+            .publish() \
+            .ref_count()
 
-_ready_to_merge = _observerable \
-    .map(lambda all_requests: any([_is_ready_to_merge(mr) for mr in all_requests])) \
-    .start_with(False) \
-    .distinct_until_changed()
+        self._ready_to_merge = self._observerable \
+            .map(lambda requests: any([is_ready_to_merge(request) for request in requests])) \
+            .start_with(False) \
+            .distinct_until_changed()
+
+    def on_ready_to_merge(self, on_next):
+        self._ready_to_merge.subscribe(on_next)
 
 
-def _is_ready_to_merge(merge_request):
+def is_ready_to_merge(merge_request):
     return merge_request.is_work_in_progress() is False \
            and merge_request.get_votes_diff() >= ObserveConfig.upvotes_to_merge
-
-
-def on_ready_to_merge(on_next):
-    _ready_to_merge.subscribe(on_next)
