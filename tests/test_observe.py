@@ -47,8 +47,9 @@ def test_on_ready_to_merge(mock_get_merge_requests, mock_is_ready_to_merge):
 
 class OnReadyToMergeTest:
     def __init__(self, mock_get_merge_requests, mock_is_ready_to_merge):
+        self._request_sample = MergeRequest([])
         self._mock_get_merge_requests = mock_get_merge_requests
-        self._mock_get_merge_requests.return_value = [MergeRequest([])]
+        self._mock_get_merge_requests.return_value = [self._request_sample]
 
         self._mock_is_ready_to_merge = mock_is_ready_to_merge
         self._mock_is_ready_to_merge.return_value = False
@@ -70,6 +71,6 @@ class OnReadyToMergeTest:
         return self
 
     def then(self, ready_to_merge, notifications_count):
-        assert_equal(self._notifications[-1], ready_to_merge)
+        assert_equal(self._notifications[-1], self._request_sample if ready_to_merge else None)
         assert_equal(len(self._notifications), notifications_count)
         assert_equal(self._mock_is_ready_to_merge.call_count, self._request_count)

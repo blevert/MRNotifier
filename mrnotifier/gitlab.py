@@ -17,8 +17,11 @@ class JsonContainer:
     def __init__(self, json):
         self.json = json
 
+    def __str__(self):
+        return str(self.json)
+
     def __eq__(self, other):
-        return self.json == other.json
+        return isinstance(other, self.__class__) and self.json == other.json
 
 
 class MergeRequest(JsonContainer):
@@ -49,9 +52,6 @@ class MergeRequest(JsonContainer):
             return [Award(award) for award in response.json()]
         else:
             return []
-
-    def __eq__(self, other):
-        return self.json == other.json
 
 
 class Award(JsonContainer):

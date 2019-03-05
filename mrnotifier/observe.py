@@ -14,8 +14,8 @@ class Observe:
             .ref_count()
 
         self._ready_to_merge = self._observerable \
-            .map(lambda requests: any([is_ready_to_merge(request) for request in requests])) \
-            .start_with(False) \
+            .map(lambda requests: next((request for request in requests if is_ready_to_merge(request)), None)) \
+            .start_with(None) \
             .distinct_until_changed()
 
     def on_ready_to_merge(self, on_next):
