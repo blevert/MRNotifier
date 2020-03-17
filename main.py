@@ -18,7 +18,6 @@ class Main:
         Observe().on_ready_to_merge(self.update_tray)
 
     def update_tray(self, ready_to_merge):
-        logging.info('Ready to merge: ' + str(ready_to_merge))
         if ready_to_merge is None:
             self.tray.set_icon(TrayConfig.main_icon)
             self._ready_to_merge = None

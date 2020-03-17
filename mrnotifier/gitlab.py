@@ -12,6 +12,8 @@ _session = requests.Session()
 _session.verify = GitlabConfig.verifySSL
 _session.headers.update({'private-token': GitlabConfig.token})
 
+requests.packages.urllib3.disable_warnings(category=requests.packages.urllib3.exceptions.InsecureRequestWarning)
+
 
 class JsonContainer:
     def __init__(self, json):
@@ -28,6 +30,9 @@ class MergeRequest(JsonContainer):
     def __init__(self, json):
         super().__init__(json)
 
+    def get_iid(self):
+        return self.json['iid']
+
     def is_work_in_progress(self):
         return self.json['work_in_progress'] is True
 
@@ -40,13 +45,15 @@ class MergeRequest(JsonContainer):
     def get_votes_diff(self):
         return self.get_upvotes() - self.get_downvotes()
 
+    def has_any_votes(self):
+        return self.get_upvotes() > 0 or self.get_downvotes() > 0
+
     def get_web_url(self):
         return self.json['web_url']
 
     def get_awards(self):
         project_id = self.json['project_id']
-        merge_request_iid = self.json['merge_request_iid']
-        url = _award_endpoint.format(project_id=project_id, merge_request_iid=merge_request_iid)
+        url = _award_endpoint.format(project_id=project_id, merge_request_iid=self.get_iid())
         response = _session.get(url)
         if response.ok:
             return [Award(award) for award in response.json()]
@@ -57,6 +64,9 @@ class MergeRequest(JsonContainer):
 class Award(JsonContainer):
     def __init__(self, json):
         super().__init__(json)
+
+    def get_id(self):
+        return self.json['id']
 
     def get_author(self):
         return AwardAuthor(self.json['user'])

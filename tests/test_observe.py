@@ -10,14 +10,16 @@ from nose.tools import assert_equal
 
 def test_is_ready_to_merge():
     ReadyToMergeTest().given(False, ObserveConfig.upvotes_to_merge, 0).then(True)
+    ReadyToMergeTest().given(False, ObserveConfig.upvotes_to_merge + 1, 1).then(True)
     ReadyToMergeTest().given(False, ObserveConfig.upvotes_to_merge, 1).then(False)
     ReadyToMergeTest().given(True, ObserveConfig.upvotes_to_merge, 0).then(False)
     ReadyToMergeTest().given(True, ObserveConfig.upvotes_to_merge, 1).then(False)
+    ReadyToMergeTest().given(True, ObserveConfig.upvotes_to_merge + 1, 1).then(False)
 
 
 class ReadyToMergeTest:
     def __init__(self):
-        self.mock = MergeRequest([])
+        self.mock = MergeRequest({})
 
     def given(self, work_in_progress, upvotes, downvotes):
         self.mock.is_work_in_progress = MagicMock(return_value=work_in_progress)
@@ -47,7 +49,10 @@ def test_on_ready_to_merge(mock_get_merge_requests, mock_is_ready_to_merge):
 
 class OnReadyToMergeTest:
     def __init__(self, mock_get_merge_requests, mock_is_ready_to_merge):
-        self._request_sample = MergeRequest([])
+        self._request_sample = MergeRequest({})
+        self._request_sample.get_upvotes = MagicMock(return_value=0)
+        self._request_sample.get_downvotes = MagicMock(return_value=0)
+
         self._mock_get_merge_requests = mock_get_merge_requests
         self._mock_get_merge_requests.return_value = [self._request_sample]
 
@@ -73,4 +78,4 @@ class OnReadyToMergeTest:
     def then(self, ready_to_merge, notifications_count):
         assert_equal(self._notifications[-1], self._request_sample if ready_to_merge else None)
         assert_equal(len(self._notifications), notifications_count)
-        assert_equal(self._mock_is_ready_to_merge.call_count, self._request_count)
+        assert_equal(self._mock_get_merge_requests.call_count, self._request_count)

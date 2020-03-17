@@ -18,5 +18,5 @@ class TrayConfig:
 
 
 class ObserveConfig:
-    interval = _config.getint('observe', 'interval')
+    interval = _config.getfloat('observe', 'interval')
     upvotes_to_merge = _config.getint('observe', 'upvotes_to_merge')
