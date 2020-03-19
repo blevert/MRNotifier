@@ -1,18 +1,21 @@
 from urllib.parse import urljoin
 
 import requests
+import logging
 
 from mrnotifier.config import GitlabConfig
 
 _api = urljoin(GitlabConfig.url, 'api/v4/')
 _merge_endpoint = urljoin(_api, 'merge_requests?state={state}&scope={scope}')
-_award_endpoint = urljoin(_api, 'projects/{project_id}/merge_requests/{merge_request_iid}/award_emoji')
+_award_endpoint = urljoin(
+    _api, 'projects/{project_id}/merge_requests/{merge_request_iid}/award_emoji')
 
 _session = requests.Session()
 _session.verify = GitlabConfig.verifySSL
 _session.headers.update({'private-token': GitlabConfig.token})
 
-requests.packages.urllib3.disable_warnings(category=requests.packages.urllib3.exceptions.InsecureRequestWarning)
+requests.packages.urllib3.disable_warnings(
+    category=requests.packages.urllib3.exceptions.InsecureRequestWarning)
 
 
 class JsonContainer:
@@ -53,23 +56,9 @@ class MergeRequest(JsonContainer):
 
     def get_awards(self):
         project_id = self.json['project_id']
-        url = _award_endpoint.format(project_id=project_id, merge_request_iid=self.get_iid())
-        response = _session.get(url)
-        if response.ok:
-            return [Award(award) for award in response.json()]
-        else:
-            return []
-
-
-class Award(JsonContainer):
-    def __init__(self, json):
-        super().__init__(json)
-
-    def get_id(self):
-        return self.json['id']
-
-    def get_author(self):
-        return AwardAuthor(self.json['user'])
+        url = _award_endpoint.format(
+            project_id=project_id, merge_request_iid=self.get_iid())
+        return [Award(award) for award in _get_response_json(url)]
 
 
 class AwardAuthor(JsonContainer):
@@ -83,10 +72,31 @@ class AwardAuthor(JsonContainer):
         return self.json['avatar_url']
 
 
+class Award(JsonContainer):
+    def __init__(self, json):
+        super().__init__(json)
+
+    def get_id(self):
+        return self.json['id']
+
+    def get_emoji(self):
+        return self.json['name']
+
+    def get_author(self) -> AwardAuthor:
+        return AwardAuthor(self.json['user'])
+
+
 def get_merge_requests(state='opened', scope='assigned_to_me'):
     url = _merge_endpoint.format(state=state, scope=scope)
-    response = _session.get(url)
-    if response.ok:
-        return [MergeRequest(mr) for mr in response.json()]
-    else:
-        return []
+    return [MergeRequest(mr) for mr in _get_response_json(url)]
+
+
+def _get_response_json(url):
+    try:
+        response = _session.get(url)
+        if response.ok:
+            return response.json()
+    except requests.exceptions.RequestException as err:
+        logging.error(err)
+
+    return ""
